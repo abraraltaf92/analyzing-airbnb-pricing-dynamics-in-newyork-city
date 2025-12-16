@@ -1,0 +1,7 @@
+# Mac junk
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+

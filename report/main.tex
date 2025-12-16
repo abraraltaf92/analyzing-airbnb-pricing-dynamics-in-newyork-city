@@ -1,0 +1,291 @@
+\documentclass[12pt]{article}
+
+% ---------------- Packages ----------------
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\setstretch{1.3}
+
+% ---------------- Title ----------------
+\title{
+\textbf{Analyzing Airbnb Pricing Dynamics in New York City} \\
+\vspace{0.3cm}
+\large Using Clustering and Regression Techniques
+}
+
+\author{
+Abrar Altaf Lone \\
+Data Mining Fall 2025 72958 \\
+MS in Data Science \\
+Pace University
+}
+
+\date{Dec 16 2025}
+
+% ---------------- Document ----------------
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+% ---------------- Abstract ----------------
+\begin{abstract}
+This study analyzes Airbnb listings in New York City to understand pricing behavior
+using data mining techniques. Exploratory data analysis, clustering, and regression
+models are applied to identify pricing patterns and predict listing prices based on
+location, demand, and availability characteristics. Results show that non-linear models
+outperform linear baselines, highlighting the complexity of Airbnb pricing dynamics.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ---------------- Introduction ----------------
+\section{Introduction}
+Airbnb pricing in New York City varies significantly due to factors such as location,
+room type, demand, and regulatory constraints. Understanding these factors is important
+for hosts, guests, and policymakers. This project applies data mining techniques to
+explore pricing patterns and build predictive models using real-world Airbnb data.
+
+% ---------------- Problem Statement ----------------
+\section{Problem Statement}
+The objective of this project is to analyze Airbnb listings in New York City to identify
+pricing patterns, segment listings using clustering techniques, and predict listing prices
+using supervised learning models.
+
+% ---------------- Dataset Description ----------------
+\section{Dataset Description}
+The dataset used in this study is obtained from Inside Airbnb~\cite{insideairbnb} and contains summary-level
+information on Airbnb listings in New York City. The file \texttt{listings.csv} includes
+listing characteristics related to price, location, demand, and host activity.
+
+After preprocessing, the dataset contains approximately 20,900 listings with 10
+predictor variables and one target variable.
+
+% ---------------- Data Preprocessing ----------------
+\section{Data Preprocessing}
+
+\subsection{Missing Values}
+Listings with missing price values were removed, as price is the target variable.
+Missing values in review-related features were imputed with zero to indicate no recent
+review activity.
+
+\subsection{Feature Selection}
+Text-heavy attributes, identifiers, and metadata not directly related to pricing were
+excluded to improve interpretability and reduce dimensionality.
+
+\subsection{Target Transformation}
+Price was log-transformed to reduce skewness and stabilize variance for regression modeling.
+
+\subsection{Outlier Handling}
+An interquartile range (IQR)–based approach was applied to the log-transformed price.
+Approximately 1.8\% of extreme observations were removed, retaining realistic price ranges
+between USD 16 and USD 1,500.
+
+% ---------------- Exploratory Data Analysis ----------------
+\section{Exploratory Data Analysis}
+
+\subsection{Price Distribution}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/log_price_distribution.png}
+\caption{Distribution of Log-Transformed Airbnb Prices}
+\label{fig:logprice}
+\end{figure}
+
+Figure~\ref{fig:logprice} shows that the log-transformed price distribution is approximately
+symmetric and unimodal, indicating that the transformation effectively reduced skewness.
+
+\subsection{Price by Borough}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/price_by_borough.png}
+\caption{Log-Transformed Airbnb Prices by Borough}
+\label{fig:borough}
+\end{figure}
+
+Figure~\ref{fig:borough} highlights substantial pricing differences across boroughs.
+Manhattan listings exhibit the highest median prices and greatest variability, while
+the Bronx has the lowest median prices.
+
+\subsection{Price by Room Type}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/price_by_room_type.png}
+\caption{Log-Transformed Airbnb Prices by Room Type}
+\label{fig:roomtype}
+\end{figure}
+
+Figure~\ref{fig:roomtype} shows that entire homes and hotel rooms command higher prices
+than private and shared rooms, indicating room type as a major determinant of pricing.
+
+\subsection{Correlation Analysis}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/correlation_matrix.png}
+\caption{Correlation Matrix of Numeric Features}
+\label{fig:corr}
+\end{figure}
+
+Figure~\ref{fig:corr} indicates weak linear correlations between most predictors and
+price, motivating the use of multivariate and non-linear modeling techniques.
+
+% ---------------- Methods ----------------
+\section{Methods}
+
+\subsection{Clustering}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/elbow_method.png}
+\caption{Elbow Method for Selecting the Number of Clusters}
+\label{fig:elbow}
+\end{figure}
+
+K-Means clustering was applied to standardized numeric features. As shown in
+Figure~\ref{fig:elbow}, a noticeable reduction in marginal gains occurs beyond $k=5$,
+which was selected as the optimal number of clusters. The silhouette score of approximately
+0.33 indicates reasonable cluster separation.
+
+\subsection{Regression Models}
+Linear regression was used as a baseline model, followed by a Random Forest Regressor to
+capture non-linear relationships and feature interactions.
+
+% ---------------- Results ----------------
+\section{Results}
+
+\subsection{Clustering Results}
+Five distinct clusters were identified, representing typical listings, budget listings,
+high-demand listings, professional hosts, and regulation-driven long-term listings.
+
+\begin{table}[H]
+\centering
+\caption{Cluster Summary Statistics}
+\label{tab:cluster_summary}
+
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+Cluster & Size & Avg Log Price & Avg Min Nights & Avg Reviews & Avg Reviews/Month & Avg Availability \\
+\midrule
+0 & 1029  & 6.06 & 31.24 & 0.17  & 0.01 & 224.99 \\
+1 & 5873  & 4.92 & 25.08 & 26.86 & 0.64 & 115.70 \\
+2 & 11910 & 5.00 & 28.80 & 16.59 & 0.38 & 321.48 \\
+3 & 2068  & 5.22 & 9.49  & 204.43 & 4.26 & 236.69 \\
+4 & 54    & 5.11 & 370.93 & 17.56 & 0.18 & 302.57 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Table~\ref{tab:cluster_summary} summarizes the characteristics of each cluster.
+Clusters differ notably in terms of price, minimum stay requirements, review activity,
+and availability. These differences enable meaningful interpretation of listing segments,
+such as high-demand short-stay listings, long-term rental listings, and professionally
+managed properties.
+
+\subsection{Regression Results}
+Table~\ref{tab:comparison} compares regression model performance.
+
+\begin{table}[H]
+\centering
+\caption{Regression Model Performance}
+\label{tab:comparison}
+\begin{tabular}{lcc}
+\toprule
+Model & $R^2$ & RMSE (log price) \\
+\midrule
+Linear Regression & 0.50 & 0.55 \\
+Random Forest Regressor & 0.72 & 0.41 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:comparison} shows that the Random Forest Regressor achieves substantially stronger
+predictive performance than the linear regression baseline. The linear model explains about 50\% of
+the variance in log-transformed prices ($R^2=0.50$), while the Random Forest improves explanatory power
+to about 72\% ($R^2=0.72$) and reduces prediction error (RMSE from 0.55 to 0.41 on the log-price scale).
+This improvement suggests that Airbnb pricing is not well-approximated by a purely linear relationship
+and instead depends on non-linear effects and interactions among location, room type, demand indicators,
+and availability constraints.
+
+\subsection{Feature Importance Analysis}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/feature_importance.png}
+\caption{Top 10 Feature Importances from the Random Forest Regressor}
+\label{fig:feature_importance}
+\end{figure}
+
+Figure~\ref{fig:feature_importance} summarizes the most influential predictors in the Random Forest model.
+Room type (especially entire home/apartment) emerges as a dominant driver of price, reflecting the premium
+associated with full-unit rentals. Minimum night requirements and host listing count also contribute meaningfully,
+indicating that stay-length policies and professional hosting behavior are related to pricing strategies.
+Geographic variables (latitude and longitude) rank highly, supporting the strong role of location within NYC.
+Overall, the feature importance results align with the EDA findings and provide an interpretable explanation for
+why the non-linear model outperforms the linear baseline.
+
+% ---------------- Discussion ----------------
+\section{Discussion}
+Results indicate that Airbnb pricing is influenced by complex interactions among location,
+room type, availability, and host behavior. The superior performance of the Random Forest
+model confirms the presence of non-linear pricing dynamics in the New York City Airbnb market.
+
+% ---------------- Limitations ----------------
+\section{Limitations and Future Work}
+This study is limited by the absence of amenities, textual descriptions, and seasonal
+effects. Future work could incorporate natural language processing, time-series analysis,
+and classification-based pricing strategies.
+
+% ---------------- Conclusion ----------------
+\section{Conclusion}
+This project demonstrates the application of data mining techniques to analyze Airbnb
+pricing in New York City. Clustering reveals meaningful market segments, while regression
+models highlight the importance of non-linear relationships in price prediction.
+
+% ---------------- Tools Used ----------------
+\section{Tools Used}
+
+The following tools and technologies were used in this project:
+
+\begin{itemize}
+\item Python 3.12
+\item Jupyter Notebook (Anaconda distribution)
+\item pandas and NumPy for data manipulation
+\item matplotlib and seaborn for visualization
+\item scikit-learn for machine learning and model evaluation
+\item LaTeX (Overleaf) for report preparation
+\item Google Slides for project presentation
+\end{itemize}
+
+% ---------------- References ----------------
+
+\section{References}
+\renewcommand{\refname}{}
+\vspace{-2.75em}
+\begin{thebibliography}{9}
+\bibitem{insideairbnb}
+Inside Airbnb. \textit{New York City Airbnb Data}.  
+Available at: \url{https://insideairbnb.com/get-the-data/}
+
+\bibitem{sklearn}
+Scikit-learn Documentation.  
+\url{https://scikit-learn.org}
+
+\end{thebibliography}
+
+\end{document}
